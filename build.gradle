@@ -1,0 +1,102 @@
+buildscript {
+    ext {
+        springBootVersion = '2.0.0.BUILD-SNAPSHOT'
+        gradleWrapperVersion = '3.3'
+        gradleDockerVersion = '1.2'
+    }
+    repositories {
+        jcenter()
+        maven { url 'http://repo.spring.io/snapshot' }
+        maven { url 'http://repo.spring.io/milestone' }
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:$springBootVersion")
+        classpath("se.transmode.gradle:gradle-docker:$gradleDockerVersion")
+    }
+}
+
+ext {
+
+}
+
+project('monolith') {
+
+    apply plugin: 'java'
+    apply plugin: 'org.springframework.boot'
+    apply plugin: 'docker'
+
+    jar {
+        baseName = 'monolith'
+        version = '0.0.1-SNAPSHOT'
+    }
+
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+
+    repositories {
+        jcenter()
+        maven { url "http://repo.spring.io/snapshot" }
+        maven { url "http://repo.spring.io/milestone" }
+    }
+
+    dependencies {
+        compile('org.springframework.boot:spring-boot-starter')
+        compile('org.springframework.boot:spring-boot-starter-data-jpa')
+        compile('org.springframework.boot:spring-boot-starter-webflux')
+        compile('org.liquibase:liquibase-core')
+        compile('com.h2database:h2')
+        compile('io.reactivex.rxjava2:rxjava')
+        testCompile('org.springframework.boot:spring-boot-starter-test')
+    }
+
+    task buildDocker(type: Docker) {
+        applicationName = project.name
+        tag = "microservices-loves-cqrs/${applicationName}"
+        dockerfile = file('src/main/docker/Dockerfile')
+        doFirst {
+            copy {
+                from jar
+                into stageDir
+            }
+        }
+    }
+    buildDocker.group = 'build'
+    build.finalizedBy 'buildDocker'
+}
+
+project('web') {
+    apply plugin: 'docker'
+
+    task build(type: Exec) {
+        commandLine 'cmd', '/c', 'ng build --target=production'
+    }
+    build.group = 'build'
+
+    task buildDocker(type: Docker) {
+        applicationName = project.name
+        tag = "microservices-loves-cqrs/${applicationName}"
+        dockerfile = file('docker/Dockerfile')
+        doFirst {
+            copy {
+                from 'dist'
+                into stageDir
+            }
+        }
+    }
+    buildDocker.group = 'build'
+    build.finalizedBy 'buildDocker'
+}
+
+task up(type: Exec) {
+    commandLine 'cmd', '/c', 'docker-compose up -d'
+}
+up.group = 'microservices-loves-cqrs'
+
+task down(type: Exec) {
+    commandLine 'cmd', '/c', 'docker-compose down'
+}
+down.group = 'microservices-loves-cqrs'
+
+task wrapper(type: Wrapper) {
+    gradleVersion = gradleWrapperVersion
+}

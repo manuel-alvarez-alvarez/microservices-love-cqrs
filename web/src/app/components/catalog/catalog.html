@@ -1,0 +1,22 @@
+<md-toolbar>
+  <span>Catalog</span>
+  <span class="toolbar-filler"></span>
+  <span><button md-raised-button (click)="showAddProductDialog()"><md-icon class="md-32">library_add</md-icon>&nbsp;Add</button></span>
+</md-toolbar>
+<table class="table table-condensed table-striped table-mc-indigo">
+  <thead>
+  <tr>
+    <th>Product</th>
+    <th>Price</th>
+    <th>Image</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr *ngFor="let product of products | async">
+    <td>{{product.name}}</td>
+    <td>{{product.price}}</td>
+    <td><img src="{{product.picture}}" height="32"/></td>
+  </tr>
+  </tbody>
+</table>
+

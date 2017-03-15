@@ -1,0 +1,22 @@
+<h1 md-dialog-title>New product</h1>
+<div md-dialog-content>
+  <div>
+    <md-input-container>
+      <input type="text" mdInput placeholder="Name" [(ngModel)]="product.name">
+    </md-input-container>
+  </div>
+  <div>
+    <md-input-container>
+      <input type="number" mdInput placeholder="Price" min="0" step="0.01" [(ngModel)]="product.price">
+    </md-input-container>
+  </div>
+  <div>
+    <md-input-container>
+      <input type="url" mdInput placeholder="Picture URL" [(ngModel)]="product.picture">
+    </md-input-container>
+  </div>
+</div>
+<div md-dialog-actions>
+  <button md-raised-button (click)="dialogRef.close(product)"><md-icon class="md-24">library_add</md-icon>&nbsp;Add</button>
+  <button md-raised-button (click)="dialogRef.close('CLOSED')"><md-icon class="md-24">close</md-icon>&nbsp;Close</button>
+</div>

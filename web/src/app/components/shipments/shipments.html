@@ -1,0 +1,24 @@
+<md-toolbar>
+  <span>Shipments</span>
+</md-toolbar>
+<table class="table table-condensed table-striped table-mc-indigo">
+  <thead>
+  <tr>
+    <th>Last update</th>
+    <th>Status</th>
+    <th></th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr *ngFor="let shipment of shipments | async">
+    <td>{{shipment.timestamp | date: 'dd/MM/yyyy HH:mm'}}</td>
+    <td>{{shipment.status}}</td>
+    <td>
+      <button [disabled]="shipment.status !== 'NEW'" md-raised-button color="primary" (click)="doShip(shipment)"><md-icon class="md-24">local_shipping</md-icon>&nbsp;Ship</button>
+      <button [disabled]="shipment.status !== 'SHIPPED'" md-raised-button color="primary" (click)="doDeliver(shipment)"><md-icon class="md-24">home</md-icon>&nbsp;Deliver</button>
+      <span *ngIf="shipment.status === 'DELIVERED'"><md-icon class="md-24">done</md-icon> The item has been delivered</span>
+    </td>
+  </tr>
+  </tbody>
+</table>
+

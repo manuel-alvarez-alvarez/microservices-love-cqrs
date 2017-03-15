@@ -1,0 +1,26 @@
+<h1 md-dialog-title>Your purchases</h1>
+<div md-dialog-content>
+  <table class="table table-condensed table-striped table-mc-indigo">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>N. of items</th>
+        <th>Price</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let purchase of purchases | async">
+      <td>{{purchase.sold | date: 'dd/MM/yyyy HH:mm'}}</td>
+      <td>{{getItems(purchase)}} item(s)</td>
+      <td>{{purchase.price}} $</td>
+      <td>{{purchase.status}}</td>
+    </tr>
+    </tbody>
+    <tfoot>
+    </tfoot>
+  </table>
+</div>
+<div md-dialog-actions>
+  <button md-raised-button (click)="dialogRef.close('CLOSED')"><md-icon class="md-24">close</md-icon>&nbsp;Close</button>
+</div>
