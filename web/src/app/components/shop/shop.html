@@ -1,0 +1,23 @@
+<md-toolbar>
+  <span>Shop</span>
+  <span class="toolbar-filler"></span>
+  <span><button md-raised-button (click)="showHistory()"><md-icon class="md-32">watch_later</md-icon>&nbsp;History</button></span>
+  <span><button md-raised-button (click)="showCart()"><md-icon class="md-32">shopping_cart</md-icon>&nbsp;<span class="index">{{getCartSize()}}</span></button></span>
+</md-toolbar>
+<ul class="catalog-grid" >
+  <li *ngFor="let item of products | async">
+    <md-card>
+      <md-card-header>
+        <md-card-title color="primary">{{item.product.price}} $ <span class="index">{{item.inventory.available}}</span></md-card-title>
+      </md-card-header>
+      <img [src]="item.product.picture" class="catalog-picture"  md-card-image>
+      <md-card-content>
+        {{item.product.name}}
+      </md-card-content>
+      <md-card-actions>
+        <button md-raised-button color="primary" [disabled]="item.inventory.available === 0" class="catalog-grid-button" (click)="addToCart(item)">Buy</button>
+      </md-card-actions>
+    </md-card>
+  </li>
+</ul>
+

@@ -1,0 +1,24 @@
+<md-toolbar>
+  <span>Store</span>
+</md-toolbar>
+<table class="table table-condensed table-striped table-mc-indigo">
+  <thead>
+  <tr>
+    <th>Product</th>
+    <th>Available</th>
+    <th></th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr *ngFor="let item of inventory | async">
+    <td>{{item.product.name}}</td>
+    <td>{{item.inventory.available}}</td>
+    <td>
+      <button [disabled]="item.amount === 0" md-raised-button color="primary" (click)="add(item)"><md-icon class="md-24">keyboard_arrow_up</md-icon></button>
+      <md-slider min="0" step="1" thumb-label="true" [(ngModel)]="item.amount"></md-slider>
+      <button [disabled]="item.amount === 0 || item.inventory.available - item.amount < 0" md-raised-button color="primary" (click)="remove(item)"><md-icon class="md-24">keyboard_arrow_down</md-icon></button>
+    </td>
+  </tr>
+  </tbody>
+</table>
+

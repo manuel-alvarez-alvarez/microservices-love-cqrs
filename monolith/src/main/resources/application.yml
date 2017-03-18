@@ -1,0 +1,20 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: none
+
+  cloud:
+    stream:
+      kafka:
+        binder:
+          headers: type
+      bindings:
+        input:
+          destination: processor
+          consumer:
+            resetOffsets: true
+          contentType: application/json
+        output:
+          destination: processor
+          contentType: application/json
+
