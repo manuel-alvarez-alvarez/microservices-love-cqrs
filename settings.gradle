@@ -1,0 +1,2 @@
+include 'sales', 'catalog', 'inventory', 'shipping', 'web', 'registry', 'gateway'
+

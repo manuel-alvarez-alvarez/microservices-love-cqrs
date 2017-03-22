@@ -1,0 +1,31 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: gateway
+
+eureka:
+  client:
+    registerWithEureka: false
+    serviceUrl:
+      defaultZone: http://localhost:8090/eureka/
+
+zuul:
+  routes:
+    catalog:
+      path: /api/catalog/**
+      stripPrefix: false
+    inventory:
+      path: /api/inventory/**
+      stripPrefix: false
+    sales:
+      path: /api/sales/**
+      stripPrefix: false
+    shipping:
+      path: /api/shipping/**
+      stripPrefix: false
+
+ribbon:
+  eureka:
+    enabled: true

@@ -1,0 +1,205 @@
+buildscript {
+    ext {
+        springBootVersion = '1.5.2.RELEASE'
+        gradleWrapperVersion = '3.3'
+        gradleDockerVersion = '1.2'
+        dependencyManagementVersion = '1.0.1.RELEASE'
+    }
+    repositories {
+        jcenter()
+        maven { url 'http://repo.spring.io/snapshot' }
+        maven { url 'http://repo.spring.io/milestone' }
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:$springBootVersion")
+        classpath("se.transmode.gradle:gradle-docker:$gradleDockerVersion")
+        classpath("io.spring.gradle:dependency-management-plugin:$dependencyManagementVersion")
+    }
+}
+
+ext {
+    streamDependenciesVersion = "Chelsea.RC1"
+    springCloudVersion = "Camden.SR6"
+    springCloudVersionNumber = '1.2.2.RELEASE'
+}
+
+configure(subprojects.findAll { ['catalog', 'inventory', 'sales', 'shipping'].contains(it.name) }) {
+
+    apply plugin: 'java'
+    apply plugin: 'org.springframework.boot'
+    apply plugin: 'docker'
+    apply plugin: "io.spring.dependency-management"
+
+    jar {
+        baseName = project.name
+        version = '0.0.1-SNAPSHOT'
+    }
+
+    dependencyManagement {
+        imports {
+            mavenBom "org.springframework.cloud:spring-cloud-stream-dependencies:$streamDependenciesVersion"
+        }
+    }
+
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+
+    repositories {
+        jcenter()
+        maven { url "http://repo.spring.io/snapshot" }
+        maven { url "http://repo.spring.io/milestone" }
+    }
+
+    dependencies {
+        compile('org.springframework.boot:spring-boot-starter')
+        compile('org.springframework.cloud:spring-cloud-stream')
+        compile('org.springframework.cloud:spring-cloud-starter-stream-kafka')
+        compile('org.springframework.boot:spring-boot-starter-data-jpa')
+        compile("org.springframework.cloud:spring-cloud-starter-eureka:${springCloudVersionNumber}")
+        compile('org.liquibase:liquibase-core')
+        compile('com.h2database:h2')
+        testCompile('org.springframework.boot:spring-boot-starter-test')
+    }
+
+    task buildDocker(type: Docker) {
+        applicationName = project.name
+        tag = "microservices-loves-cqrs/${applicationName}"
+        dockerfile = file('src/main/docker/Dockerfile')
+        doFirst {
+            copy {
+                from jar
+                into stageDir
+            }
+        }
+    }
+    buildDocker.group = 'build'
+    build.finalizedBy 'buildDocker'
+}
+
+project('web') {
+    apply plugin: 'docker'
+
+    task build(type: Exec) {
+        commandLine 'cmd', '/c', 'ng build --target=production'
+    }
+    build.group = 'build'
+
+    task buildDocker(type: Docker) {
+        applicationName = project.name
+        tag = "microservices-loves-cqrs/${applicationName}"
+        dockerfile = file('docker/Dockerfile')
+        doFirst {
+            copy {
+                from 'dist'
+                into stageDir
+            }
+        }
+    }
+    buildDocker.group = 'build'
+    build.finalizedBy 'buildDocker'
+}
+
+project('gateway') {
+    apply plugin: 'java'
+    apply plugin: 'org.springframework.boot'
+    apply plugin: 'docker'
+
+    jar {
+        baseName = project.name
+        version = '0.0.1-SNAPSHOT'
+    }
+
+    dependencyManagement {
+        imports {
+            mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+        }
+    }
+
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+
+    repositories {
+        jcenter()
+        maven { url "http://repo.spring.io/snapshot" }
+        maven { url "http://repo.spring.io/milestone" }
+    }
+
+    dependencies {
+        compile('org.springframework.cloud:spring-cloud-starter-eureka')
+        compile('org.springframework.cloud:spring-cloud-starter-zuul')
+        testCompile('org.springframework.boot:spring-boot-starter-test')
+    }
+
+    task buildDocker(type: Docker) {
+        applicationName = project.name
+        tag = "microservices-loves-cqrs/${applicationName}"
+        dockerfile = file('src/main/docker/Dockerfile')
+        doFirst {
+            copy {
+                from jar
+                into stageDir
+            }
+        }
+    }
+    buildDocker.group = 'build'
+    build.finalizedBy 'buildDocker'
+}
+
+project('registry') {
+    apply plugin: 'java'
+    apply plugin: 'org.springframework.boot'
+    apply plugin: 'docker'
+
+    jar {
+        baseName = project.name
+        version = '0.0.1-SNAPSHOT'
+    }
+
+    dependencyManagement {
+        imports {
+            mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+        }
+    }
+
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+
+    repositories {
+        jcenter()
+        maven { url "http://repo.spring.io/snapshot" }
+        maven { url "http://repo.spring.io/milestone" }
+    }
+
+    dependencies {
+        compile('org.springframework.cloud:spring-cloud-starter-eureka-server')
+        testCompile('org.springframework.boot:spring-boot-starter-test')
+    }
+
+    task buildDocker(type: Docker) {
+        applicationName = project.name
+        tag = "microservices-loves-cqrs/${applicationName}"
+        dockerfile = file('src/main/docker/Dockerfile')
+        doFirst {
+            copy {
+                from jar
+                into stageDir
+            }
+        }
+    }
+    buildDocker.group = 'build'
+    build.finalizedBy 'buildDocker'
+}
+
+task up(type: Exec) {
+    commandLine 'cmd', '/c', 'docker-compose up -d'
+}
+up.group = 'microservices-loves-cqrs'
+
+task down(type: Exec) {
+    commandLine 'cmd', '/c', 'docker-compose down'
+}
+down.group = 'microservices-loves-cqrs'
+
+task wrapper(type: Wrapper) {
+    gradleVersion = gradleWrapperVersion
+}

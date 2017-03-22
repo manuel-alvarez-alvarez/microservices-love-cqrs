@@ -1,0 +1,109 @@
+version: '2'
+services:
+
+  zookeeper:
+    image: wurstmeister/zookeeper
+    container_name: zookeper
+    ports:
+      - "2181:2181"
+
+  kafka:
+    image: wurstmeister/kafka
+    container_name: kafka
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_ADVERTISED_HOST_NAME: "kafka"
+      KAFKA_ADVERTISED_PORT: "9092"
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - zookeeper
+
+  registry:
+    image: microservices-loves-cqrs/registry
+    container_name: registry
+    expose:
+      - "8090"
+    ports:
+      - 8090:8090
+    environment:
+      SLEEP: 5
+
+  gateway:
+    image: microservices-loves-cqrs/gateway
+    container_name: gateway
+    expose:
+      - "8080"
+    ports:
+      - 8080:8080
+    environment:
+      SLEEP: 10
+      JAVA_OPTS: "-Deureka.client.serviceUrl.defaultZone=http://registry:8090/eureka/ -Dspring.cloud.stream.kafka.binder.zkNodes=zookeeper -Dspring.cloud.stream.kafka.binder.brokers=kafka"
+    depends_on:
+      - registry
+
+  catalog:
+    image: microservices-loves-cqrs/catalog
+    container_name: catalog
+    expose:
+      - "8089"
+    ports:
+      - 8089:8089
+    environment:
+      SLEEP: 20
+      JAVA_OPTS: "-Deureka.client.serviceUrl.defaultZone=http://registry:8090/eureka/ -Dspring.cloud.stream.kafka.binder.zkNodes=zookeeper -Dspring.cloud.stream.kafka.binder.brokers=kafka"
+    depends_on:
+      - kafka
+      - registry
+
+  inventory:
+    image: microservices-loves-cqrs/inventory
+    container_name: inventory
+    expose:
+      - "8088"
+    ports:
+      - 8088:8088
+    environment:
+      SLEEP: 30
+      JAVA_OPTS: "-Deureka.client.serviceUrl.defaultZone=http://registry:8090/eureka/ -Dspring.cloud.stream.kafka.binder.zkNodes=zookeeper -Dspring.cloud.stream.kafka.binder.brokers=kafka"
+    depends_on:
+      - kafka
+      - registry
+
+  sales:
+    image: microservices-loves-cqrs/sales
+    container_name: sales
+    expose:
+      - "8087"
+    ports:
+      - 8087:8087
+    environment:
+      SLEEP: 40
+      JAVA_OPTS: "-Deureka.client.serviceUrl.defaultZone=http://registry:8090/eureka/ -Dspring.cloud.stream.kafka.binder.zkNodes=zookeeper -Dspring.cloud.stream.kafka.binder.brokers=kafka"
+    depends_on:
+      - kafka
+      - registry
+
+  shipping:
+    image: microservices-loves-cqrs/shipping
+    container_name: shipping
+    expose:
+      - "8086"
+    ports:
+      - 8086:8086
+    environment:
+      SLEEP: 50
+      JAVA_OPTS: "-Deureka.client.serviceUrl.defaultZone=http://registry:8090/eureka/ -Dspring.cloud.stream.kafka.binder.zkNodes=zookeeper -Dspring.cloud.stream.kafka.binder.brokers=kafka"
+    depends_on:
+      - kafka
+      - registry
+
+  web:
+    image: microservices-loves-cqrs/web
+    container_name: web
+    expose:
+      - "80"
+    ports:
+      - 8081:80

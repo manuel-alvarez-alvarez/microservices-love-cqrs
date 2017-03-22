@@ -1,0 +1,30 @@
+server:
+  port: 8088
+
+spring:
+  application:
+    name: inventory
+  jpa:
+    hibernate:
+      ddl-auto: none
+
+  cloud:
+    stream:
+      kafka:
+        binder:
+          headers: type
+      bindings:
+        input:
+          group: inventory
+          destination: processor
+          consumer:
+            resetOffsets: true
+          contentType: application/json
+        output:
+          destination: processor
+          contentType: application/json
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8090/eureka/

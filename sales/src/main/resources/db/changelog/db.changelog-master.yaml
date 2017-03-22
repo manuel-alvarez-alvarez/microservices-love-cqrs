@@ -1,0 +1,70 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: malvarez
+      changes:
+        - createTable:
+            tableName: purchase
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: sold
+                  type: timestamp
+                  constraints:
+                    nullable: false
+              - column:
+                  name: price
+                  type: decimal
+                  constraints:
+                    nullable: false
+              - column:
+                  name: status
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: reason
+                  type: varchar(255)
+                  constraints:
+                    nullable: true
+
+        - createTable:
+            tableName: purchase_item
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: purchase
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: product
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: price
+                  type: decimal
+                  constraints:
+                    nullable: false
+              - column:
+                  name: amount
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - addForeignKeyConstraint:
+                  baseColumnNames: purchase
+                  baseTableName: purchase_item
+                  constraintName: fk_purchase_item
+                  referencedColumnNames: id
+                  referencedTableName: purchase

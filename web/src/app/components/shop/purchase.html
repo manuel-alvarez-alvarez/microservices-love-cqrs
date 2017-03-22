@@ -1,0 +1,30 @@
+<h1 md-dialog-title>Buy your selection</h1>
+<div md-dialog-content>
+  <table class="table table-condensed table-striped table-mc-indigo">
+    <thead>
+    <tr>
+      <th>Amount</th>
+      <th>Item</th>
+      <th>Price</th>
+    </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let item of purchase.items">
+        <td>{{item.amount}}</td>
+        <td>{{item.item.name}}</td>
+        <td>{{item.price}} $</td>
+      </tr>
+    </tbody>
+    <tfoot>
+      <tr class="total-row">
+        <th>{{total}}</th>
+        <th>Total</th>
+        <th>{{purchase.price}} $</th>
+      </tr>
+    </tfoot>
+  </table>
+</div>
+<div md-dialog-actions>
+  <button md-raised-button (click)="dialogRef.close('PURCHASE')"><md-icon class="md-24">monetization_on</md-icon>&nbsp;Buy</button>
+  <button md-raised-button (click)="dialogRef.close('CLOSED')"><md-icon class="md-24">close</md-icon>&nbsp;Close</button>
+</div>
